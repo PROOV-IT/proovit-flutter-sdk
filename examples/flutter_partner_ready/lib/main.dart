@@ -49,6 +49,11 @@ class _PartnerCapturePageState extends State<PartnerCapturePage> {
   }
 
   Future<SdkSession> _issueSession({required bool forceRefresh}) async {
+    final cached = _session;
+    if (!forceRefresh && cached != null &&
+        cached.expiresAt.isAfter(DateTime.now().add(const Duration(seconds: 15)))) {
+      return cached;
+    }
     final request = await _http.postUrl(Uri.parse(_partnerEndpoint.text.trim()));
     request.followRedirects = false;
     request.headers.set(HttpHeaders.authorizationHeader, 'Bearer ${_hostBearer.text.trim()}');
@@ -61,13 +66,15 @@ class _PartnerCapturePageState extends State<PartnerCapturePage> {
       throw HttpException('Backend partenaire HTTP ${response.statusCode}: ${body['error'] ?? body['message'] ?? 'session_refused'}');
     }
     final data = body['data'] is Map<String, dynamic> ? body['data'] as Map<String, dynamic> : body;
-    return SdkSession(
+    final session = SdkSession(
       accessToken: data['access_token'] as String,
       expiresAt: DateTime.parse(data['expires_at'] as String),
       companyId: data['company_id'] as String,
       actorId: data['actor_id'] as String,
       identityScope: data['identity_scope'] as String,
     );
+    _session = session;
+    return session;
   }
 
   Future<void> _run(Future<void> Function() action) async {
@@ -85,9 +92,10 @@ class _PartnerCapturePageState extends State<PartnerCapturePage> {
 
   Future<void> _connect() => _run(() async {
         _client?.dispose();
+        _session = null;
         final client = ProovitCaptureClient(baseUrl: Uri.parse(_api.text.trim()), sessionProvider: _issueSession);
-        final session = await _issueSession(forceRefresh: true);
         final capability = await client.getCapabilities();
+        final session = await _issueSession(forceRefresh: false);
         if (capability.companyId != session.companyId) throw const FormatException('La société des capabilities ne correspond pas à la session.');
         setState(() {
           _client = client;

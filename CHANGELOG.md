@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-beta.7 — 2026-10-22
+
+- Reuses the authenticated partner session in the independent example instead of minting a second session during connect.
+
 ## 0.1.0-beta.6 — 2026-10-22
 
 - Moves plugin metadata below the Gradle `plugins` block for standard Flutter/Gradle script compatibility.

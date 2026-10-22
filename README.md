@@ -11,7 +11,7 @@ dependencies:
   proovit_capture:
     git:
       url: git@github.com:PROOV-IT/proovit-flutter-sdk.git
-      ref: v0.1.0-beta.6
+      ref: v0.1.0-beta.7
 ```
 
 Then run `flutter pub get`. The Android capture core is embedded in the tagged package snapshot. Host applications do not edit `settings.gradle`, declare `:capture-core`, or configure another Maven repository. Use your normal GitHub SSH access for private dependencies. Never put a GitHub token or partner API secret in `pubspec.yaml`, source code, or build arguments.
@@ -69,7 +69,7 @@ Use a stable opaque `identityScope` for each authorized user/tenant/delegated-su
 
 The [`examples/partner-server`](examples/partner-server) Node.js 20 example is dependency-free and fail-closed. It requires host-authentication, server-side grant mapping, durable audit and session-binding adapters. Its tests exercise these contracts; implement the adapters against your actual services before deploying it. The PROOV-IT `client_secret` stays in the backend. Ignore client-supplied company, actor and scope fields, and keep the returned SDK bearer short-lived and `Cache-Control: no-store`.
 
-The [`examples/flutter_partner_ready`](examples/flutter_partner_ready) app is an independent Flutter host application consuming only the Git SDK dependency. It has no QA fixtures or internal staging broker flow.
+The [`examples/flutter_partner_ready`](examples/flutter_partner_ready) app is an independent Flutter host application consuming only the Git SDK dependency. It contains no private partner credentials or staging-only login flow.
 
 ## Capture, receipt and recovery
 
@@ -95,7 +95,7 @@ The client makes one session refresh after a GET returns 401. It does not blindl
 
 ## Version and source provenance
 
-Version `0.1.0-beta.1`, immutable Git tag `v0.1.0-beta.6`. The Android core snapshot is generated from canonical `packages/capture-core/android/src/main` by `scripts/export-flutter-sdk.sh`; use its `--check` mode to verify that the packaged core has not diverged. Package checksums are in `SHA256SUMS`. This package is not published on pub.dev or Maven. Read `CHANGELOG.md`, `COMPATIBILITY.md` and `LICENSE` before distributing it.
+Version `0.1.0-beta.1`, immutable Git tag `v0.1.0-beta.7`. The Android core snapshot is generated from canonical `packages/capture-core/android/src/main` by `scripts/export-flutter-sdk.sh`; use its `--check` mode to verify that the packaged core has not diverged. Package checksums are in `SHA256SUMS`. This package is not published on pub.dev or Maven. Read `CHANGELOG.md`, `COMPATIBILITY.md` and `LICENSE` before distributing it.
 
 ## Beta boundaries
 

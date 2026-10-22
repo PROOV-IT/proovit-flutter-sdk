@@ -1,6 +1,6 @@
 # PROOV-IT Flutter partner quickstart
 
-Independent Android application generated with `flutter create`, consuming only the private SDK Git dependency. It does not access monorepo fixtures or QA credentials. See the public staging documentation for partner backend setup and the credential/access process.
+Independent Android application generated with `flutter create`, consuming only the private SDK Git dependency. It uses only the partner’s own authenticated session endpoint and includes no credentials. See the public staging documentation for partner backend setup and the credential/access process.
 
 ```sh
 flutter pub get
