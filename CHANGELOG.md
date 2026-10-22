@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-beta.11
+
+- Publishes the source repository for unauthenticated partner installation.
+- Rewrites the README for external Flutter developers and clarifies beta and proprietary-use terms.
+- No capture behavior changed from beta.10.
+
+
 ## 0.1.0-beta.10
 
 - Generates release checksums from versioned package files only.

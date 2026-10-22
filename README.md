@@ -1,42 +1,51 @@
 # PROOV-IT Flutter Capture SDK
 
-Private beta Flutter plugin for Android photo capture with CameraX, P-256 signing in Android Keystore, upload to the PROOV-IT Capture V2 API, and authenticated receipt retrieval.
+> **⚠️ BETA — SDK EN PHASE DE TEST**
+>
+> This SDK is currently offered as a beta. Interfaces and features may change before the stable release.
+>
+> Available today: online Android/JPEG photo capture, subject to the capabilities and permissions of your PROOV-IT account.
 
-## Install from the private Git repository
+The SDK integrates PROOV-IT Capture V2 into an existing Flutter Android app. It handles the native CameraX capture, P-256 signing with Android Keystore, upload and receipt retrieval. Your application keeps its own sign-in flow; your backend authorizes the user and supplies a short-lived SDK session.
 
-Your GitHub user or organization must have read access to `PROOV-IT/proovit-flutter-sdk`.
+## Requirements
+
+| Component | Requirement |
+| --- | --- |
+| Flutter | 3.19 or newer |
+| Dart | 3.3 or newer, below 4.0 |
+| Android | `minSdk 24`, `compileSdk 36` |
+| Java | 17 bytecode target |
+| Android Gradle Plugin | 8.6.1 or newer compatible version |
+
+These are package constraints and the Android configuration in the beta. The release build was validated with Flutter 3.38.7, Dart 3.10.7, OpenJDK 21, AGP 8.6.1 and Kotlin Gradle Plugin 2.0.21. See [COMPATIBILITY.md](COMPATIBILITY.md). iOS is not implemented.
+
+## Install in a few minutes
+
+Add the public Git repository to your app's `pubspec.yaml`:
 
 ```yaml
 dependencies:
   proovit_capture:
     git:
-      url: git@github.com:PROOV-IT/proovit-flutter-sdk.git
-      ref: v0.1.0-beta.10
+      url: https://github.com/PROOV-IT/proovit-flutter-sdk.git
+      ref: v0.1.0-beta.11
 ```
 
-Then run `flutter pub get`. The Android capture core is embedded in the tagged package snapshot. Host applications do not edit `settings.gradle`, declare `:capture-core`, or configure another Maven repository.
+Then resolve packages and run the example checks:
 
-### Read-only GitHub access
+```sh
+flutter pub get
+flutter analyze
+flutter test
+flutter build apk --debug
+```
 
-A repository owner adds the integrator's GitHub user or team with **Read** permission in the private repository's **Settings → Collaborators and teams**. The integrator must authenticate Git on every developer workstation and CI runner that fetches the package.
+The package contains its Android capture-core source snapshot. Flutter/Gradle resolves AndroidX and CameraX through the standard repositories; your app does not need to edit `settings.gradle`, add a `:capture-core` project, configure a private Maven repository or use the monorepo. Commit the app's generated `pubspec.lock` to pin the resolved Git commit.
 
-- **SSH:** register the integrator's public SSH key with their GitHub account, load its private key into `ssh-agent`, and keep the `git@github.com:PROOV-IT/proovit-flutter-sdk.git` URL above.
-- **HTTPS:** replace the dependency URL with `https://github.com/PROOV-IT/proovit-flutter-sdk.git`; authenticate with Git Credential Manager or `gh auth login --git-protocol https`. For CI, grant the job a credential with read-only Contents access to this repository.
-- Verify the account can read the immutable tag with `git ls-remote <same-repository-url> refs/tags/v0.1.0-beta.10`, then run `flutter pub get`. A 404 without GitHub authentication is expected for this private repository.
+## Flutter quickstart
 
-Do not put a token or password in the Git URL, `pubspec.yaml`, source code, build arguments or logs. Use the Git credential helper or the CI platform's secret store and grant only read access. Commit the generated `pubspec.lock` in applications to pin the resolved Git commit.
-
-## Platform requirements
-
-- Flutter 3.19+ / Dart 3.3+ (package constraints); release validation uses the exact toolchain in `COMPATIBILITY.md`.
-- Android `minSdk 24`, Java 17, Android Gradle Plugin 8.6.1 or newer, compile SDK 36.
-- Android only; iOS is not implemented.
-
-## Quickstart
-
-The host application authenticates its own user and provides `issuePartnerSession`, a function that calls the partner's authenticated HTTPS backend and returns an `SdkSession`. The independent app in [`examples/flutter_partner_ready`](examples/flutter_partner_ready) includes a working HTTP implementation of that function and the Android host project. Replace its example backend URL with your own authenticated endpoint; the endpoint must map the signed-in host user to an authorized company and actor on the server.
-
-This function is a complete SDK-side capture sequence; pass the host application's `SessionProvider` implementation. The same compiling example is in [`examples/flutter_partner_ready/lib/quickstart.dart`](examples/flutter_partner_ready/lib/quickstart.dart):
+Pass a `SessionProvider` that calls your own authenticated backend. The function below shows the complete online capture flow and checks that the API receipt describes the captured media:
 
 ```dart
 import 'package:proovit_capture/proovit_capture.dart';
@@ -48,61 +57,86 @@ Future<void> captureOne(SessionProvider issuePartnerSession) async {
   );
   try {
     final capability = await client.getCapabilities();
-    final nativeCapture = capability.values['capture.native_signed'];
-    if (nativeCapture is! Map || nativeCapture['enabled'] != true ||
-        nativeCapture['available_now'] == false) {
-      throw StateError('Signed capture is unavailable for this company');
+    final capture = capability.values['capture.native_signed'];
+    if (capture is! Map || capture['enabled'] != true ||
+        capture['available_now'] == false) {
+      throw StateError('Signed capture is not available for this account');
     }
 
     await client.enrollDeviceIfNeeded();
-    final draft = await client.capturePhoto();
-    final receipt = await client.submitCapture(draft);
+    final draft = await client.capturePhoto(); // CameraX + Android Keystore
+    final receipt = await client.submitCapture(draft); // upload + receipt GET
     if (receipt.captureId != draft.captureId ||
         receipt.sha256.toLowerCase() != draft.sha256.toLowerCase() ||
         receipt.sizeBytes != draft.sizeBytes ||
         !['verified', 'verified_degraded'].contains(receipt.status)) {
-      throw StateError('The API receipt does not match the captured media');
+      throw StateError('The server receipt does not match the captured photo');
     }
+  } on SdkError catch (error) {
+    // Use statusCode / reasonCode to choose a user action; see Error handling.
+    rethrow;
   } finally {
     client.dispose();
   }
 }
 ```
 
-`SessionProvider` is the SDK's `Future<SdkSession> Function({required bool forceRefresh})` type. Implement it by making an authenticated request to your backend and mapping its response into `SdkSession`; never call the PROOV-IT credential exchange from the device. The partner backend section and sample provide that boundary. This API flow requires an online session, camera permission, and an available Android Activity.
+`SessionProvider` has type `Future<SdkSession> Function({required bool forceRefresh})`. A complete sample app, including a partner-backend session request, is in [`examples/flutter_partner_ready`](examples/flutter_partner_ready); the SDK sequence is also in [`quickstart.dart`](examples/flutter_partner_ready/lib/quickstart.dart). Replace the sample endpoint with your own HTTPS backend. The app example is not a PROOV-IT login service and contains no partner credentials.
 
-## Partner backend
+## Partner backend and sessions
 
-The [`examples/partner-server`](examples/partner-server) Node.js 20 example is dependency-free and fail-closed. It requires host-authentication, server-side grant mapping, durable audit and session-binding adapters. Its tests exercise these contracts; implement the adapters against your actual services before deploying it. The PROOV-IT `client_secret` stays in the backend. Ignore client-supplied company, actor and scope fields, and keep the returned SDK bearer short-lived and `Cache-Control: no-store`.
+Keep the PROOV-IT `client_secret` on your server. Authenticate the person with your application's normal identity provider, map that person to an allowed PROOV-IT company, actor and scopes, then exchange credentials server-to-server for a short-lived SDK session. Return only the scoped bearer and session fields to the app with `Cache-Control: no-store`. Do not trust company, actor or scope values supplied by the mobile client.
 
-The [`examples/flutter_partner_ready`](examples/flutter_partner_ready) app is an independent Flutter host application consuming only the Git SDK dependency. It contains no private partner credentials or staging-only login flow.
+The [Node.js 20 partner-server example](examples/partner-server) is a fail-closed integration template. It requires your host authentication, grant lookup, durable audit and session-binding adapters; its tests do not connect to PROOV-IT staging. Connect those interfaces to your services before deploying it. Read the [partner server guide](examples/partner-server/README.md) for request and response shapes.
 
-## Capture, receipt and recovery
+## Capabilities, capture and receipt
 
-The supported online path is capabilities → key lookup/enrollment → one-time online challenge → CameraX JPEG → Keystore signature and durable app-private journal → multipart upload → receipt GET and field comparison. `submitCapture` checks capture/company IDs, digest, length, MIME, device key, signed payload fields and the signature/media/challenge/binding/retention values returned by the API. It reports verified API fields; the current API receipt is not cryptographically signed by the server.
+Before capture, read capabilities and check both `enabled` and `available_now` for `capture.native_signed`. Capabilities, user permissions, quotas, costs and retention are set for the authorized account and can change. The API session binds the company, actor and delegated identity scope; do not allow an app screen to select another tenant by changing request fields.
 
-`listPending()` and `resumePending()` expose and submit recoverable captures for the current identity scope. After an ambiguous upload or `409 capture_reconciliation_required`, keep the same capture and original bytes, then inspect the receipt or reconcile before retrying. Set a local retention/deletion policy for pending media. Do not retry non-idempotent or billable operations without checking their response and contract.
+The supported online flow is: obtain an authorized session → read capabilities → enroll or reuse the device key → request a one-time challenge → take a CameraX JPEG → sign with the app's Android Keystore key → upload → retrieve the API receipt. `submitCapture` compares returned identity/capture fields, media digest and size, MIME type, key and challenge bindings, and receipt status with the captured draft. The receipt is observed and checked against API fields; it is not independently signed by the server.
 
-This Flutter beta supports online challenges only. The server protocol and Android core have offline-lease primitives, but this plugin does not expose a supported offline capture API. A new capture needs camera permission, an available Android Activity, disk space and a live API session.
+## Errors, retry and offline behavior
 
-## API and errors
+- `401`: session missing, expired or revoked. Refresh through your backend; the SDK performs one refresh for a GET that returns 401.
+- `402`: insufficient balance or entitlement. Show the refusal and do not report success.
+- `403`: scope or capability denied. Correct the authorization; do not retry in a loop.
+- `404`: item absent or outside the caller's identity scope.
+- `409`: conflict or capture reconciliation required. Keep the same capture ID and original bytes, inspect the receipt/reconciliation state, then decide whether to retry.
+- `422`: rejected media, signature, challenge or payload. Correct the cause before taking a new capture.
+- `503`: temporary unavailability. Use bounded backoff only for idempotent operations.
 
-See the public [developer guide](https://admin.staging.proov-it.online/developers/sdk) and [OpenAPI 3.1 document](https://admin.staging.proov-it.online/developers/sdk/openapi.yaml). Staging API base URL: `https://api.staging.proov-it.online/api/`.
+`listPending()` and `resumePending()` expose locally journaled captures for the current identity scope. Keep an app retention/deletion policy for pending media. Upload replay is not blindly performed because it may not be idempotent. A new capture requires network access, camera permission, an available Android Activity and local disk space. Offline capture is not exposed by this Flutter beta.
 
-- `401`: session missing, expired or revoked; authenticate through the partner backend.
-- `402`: insufficient balance or entitlement; display the refusal and do not claim success.
-- `403`: scope/capability denied; don't retry in a loop.
-- `404`: object absent or hidden outside this identity scope.
-- `409`: collision or reconciliation required; preserve the same capture ID and bytes.
-- `422`: payload, signature, challenge or media rejected; fix the source before a new attempt.
-- `503`: service unavailable; bounded backoff only for idempotent operations.
+## Security and license
 
-The client makes one session refresh after a GET returns 401. It does not blindly replay every capture upload.
+Never put a PROOV-IT `client_secret`, permanent credential, or long-lived user token in Dart code, an APK, a build argument, OTA, source repository or logs. Use HTTPS for the partner session endpoint and return only a short-lived, least-privilege SDK bearer. Keep session state out of persistent mobile storage unless your threat model and revocation design explicitly support it.
 
-## Version and source provenance
+This public source repository is **not an open-source grant**. [LICENSE](LICENSE) permits beta evaluation and partner integration under PROOV-IT's stated conditions; redistribution and production use require separate written authorization or the applicable partner agreement. The AndroidX/CameraX artifacts are resolved from Google Maven rather than copied into this repository; their direct dependencies declare Apache License 2.0. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-Version `0.1.0-beta.10`, immutable Git tag `v0.1.0-beta.10`. The Android core snapshot is generated from canonical `packages/capture-core/android/src/main` by `scripts/export-flutter-sdk.sh`; use its `--check` mode to verify that the packaged core has not diverged. Package checksums are in `SHA256SUMS`. This package is not published on pub.dev or Maven. Read `CHANGELOG.md`, `COMPATIBILITY.md` and `LICENSE` before distributing it.
+## Feature status
 
-## Beta boundaries
+| Feature | Beta status |
+| --- | --- |
+| Android CameraX photo capture, JPEG, online challenge | Available, subject to account capability and permission |
+| P-256 signing with Android Keystore | Available on supported Android devices |
+| Upload and API receipt retrieval/comparison | Available; receipt is not server-signed |
+| Local pending-capture journal and resume API | Available; app owns retention policy |
+| iOS | Not supported |
+| Video or audio | Not supported |
+| Offline capture through Flutter | Not supported |
+| Certified hardware attestation or app-integrity claim | Not provided |
+| Qualified timestamp or eIDAS certification | Not provided |
 
-Supported: Android photo/JPEG, online challenge and API receipt observation. Not provided by this Flutter beta: iOS, video/audio, offline capture, a server-signed receipt, hardware-attestation or app-integrity certification, qualified timestamping, eIDAS certification, or a guaranteed legal outcome. Account capabilities, limits, price and retention vary by partner contract; read the live API response.
+## API documentation and environments
+
+- [PROOV-IT developer guide](https://admin.staging.proov-it.online/developers/sdk)
+- [Capture V2 OpenAPI 3.1](https://admin.staging.proov-it.online/developers/sdk/openapi.yaml)
+- Staging API base: `https://api.staging.proov-it.online/api/`
+
+The documentation Swagger UI defaults to staging and has “Try it out” disabled. The partner's own authentication endpoint is not part of the PROOV-IT API contract.
+
+## Versioning, changelog and support
+
+Pin an immutable `v0.1.0-beta.N` tag (or its full commit SHA); do not depend on a moving branch. Verify release files with `sha256sum -c SHA256SUMS`. See [CHANGELOG.md](CHANGELOG.md) for changes, [RELEASE-METADATA.md](RELEASE-METADATA.md) for this release and [COMPATIBILITY.md](COMPATIBILITY.md) for the validated toolchain. Do not publish this package to pub.dev or Maven unless PROOV-IT announces that channel.
+
+For a bug report, open an issue in this repository with the SDK tag, Flutter/Dart versions, Android API/device model, a redacted error code and reproducible steps. Remove bearer tokens, partner identifiers, photos, private URLs and personal data from logs before sharing them.

@@ -1,5 +1,5 @@
 name: flutter_partner_ready
-description: Independent PROOV-IT private Flutter SDK integration sample.
+description: Independent PROOV-IT beta Flutter SDK integration sample.
 publish_to: none
 version: 0.1.0+1
 environment:
@@ -9,8 +9,8 @@ dependencies:
     sdk: flutter
   proovit_capture:
     git:
-      url: git@github.com:PROOV-IT/proovit-flutter-sdk.git
-      ref: v0.1.0-beta.8
+      url: https://github.com/PROOV-IT/proovit-flutter-sdk.git
+      ref: v0.1.0-beta.11
 dev_dependencies:
   flutter_test:
     sdk: flutter

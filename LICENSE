@@ -1,5 +1,11 @@
-PROOV-IT PRIVATE BETA SOFTWARE — ALL RIGHTS RESERVED
+PROOV-IT FLUTTER CAPTURE SDK — BETA EVALUATION AND INTEGRATION TERMS
 
-This source package is privately distributed for evaluation and integration only to GitHub accounts or organizations explicitly granted access by PROOV-IT. Access to this repository is not a public open-source license, does not authorize redistribution, and does not by itself authorize production use. Production use and any additional rights require written authorization from PROOV-IT under the applicable partner agreement.
+Copyright (c) 2026 PROOV-IT. All rights reserved.
 
-Copyright (c) 2026 PROOV-IT. No warranty is provided for this beta package. The above notice does not replace or amend any separately executed agreement.
+PROOV-IT permits you to download, inspect, evaluate, test and integrate this beta SDK into an application for evaluation of, or integration with, PROOV-IT services, subject to the applicable PROOV-IT partner terms and any written instructions provided with your access. This permission is limited, non-exclusive and non-transferable.
+
+This repository is publicly readable to simplify partner installation. Public availability is not an open-source license and does not grant a right to publish, redistribute, sublicense, sell, or provide the SDK or modified SDK as a standalone package. Production use, commercial deployment, and any rights beyond evaluation and integration require separate written authorization from PROOV-IT or an applicable partner agreement.
+
+The SDK is beta software provided as-is, without warranty or guarantee of availability, compatibility, evidentiary admissibility, or fitness for a particular purpose. PROOV-IT may change or discontinue beta interfaces before stable release.
+
+Third-party components retain their respective licenses; see THIRD_PARTY_NOTICES.md. This file does not replace or amend a separate agreement.
