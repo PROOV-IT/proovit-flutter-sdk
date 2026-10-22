@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'io.proovit.capture.flutter'
-version = '0.1.0-beta.7'
+version = '0.1.0-beta.8'
 
 android {
     namespace 'io.proovit.capture.flutter'

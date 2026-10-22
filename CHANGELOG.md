@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-beta.8
+
+- Correct release metadata and compatibility guidance; package contents and capture behavior are unchanged from beta.7.
+
 ## 0.1.0-beta.7 — 2026-10-22
 
 - Reuses the authenticated partner session in the independent example instead of minting a second session during connect.
