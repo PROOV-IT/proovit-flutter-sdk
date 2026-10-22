@@ -11,7 +11,7 @@ dependencies:
   proovit_capture:
     git:
       url: git@github.com:PROOV-IT/proovit-flutter-sdk.git
-      ref: v0.1.0-beta.3
+      ref: v0.1.0-beta.4
 ```
 
 Then run `flutter pub get`. The Android capture core is embedded in the tagged package snapshot. Host applications do not edit `settings.gradle`, declare `:capture-core`, or configure another Maven repository. Use your normal GitHub SSH access for private dependencies. Never put a GitHub token or partner API secret in `pubspec.yaml`, source code, or build arguments.
@@ -95,7 +95,7 @@ The client makes one session refresh after a GET returns 401. It does not blindl
 
 ## Version and source provenance
 
-Version `0.1.0-beta.1`, immutable Git tag `v0.1.0-beta.3`. The Android core snapshot is generated from canonical `packages/capture-core/android/src/main` by `scripts/export-flutter-sdk.sh`; use its `--check` mode to verify that the packaged core has not diverged. Package checksums are in `SHA256SUMS`. This package is not published on pub.dev or Maven. Read `CHANGELOG.md`, `COMPATIBILITY.md` and `LICENSE` before distributing it.
+Version `0.1.0-beta.1`, immutable Git tag `v0.1.0-beta.4`. The Android core snapshot is generated from canonical `packages/capture-core/android/src/main` by `scripts/export-flutter-sdk.sh`; use its `--check` mode to verify that the packaged core has not diverged. Package checksums are in `SHA256SUMS`. This package is not published on pub.dev or Maven. Read `CHANGELOG.md`, `COMPATIBILITY.md` and `LICENSE` before distributing it.
 
 ## Beta boundaries
 

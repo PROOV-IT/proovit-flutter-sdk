@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-beta.4 — 2026-10-22
+
+- Caps the independent sample Gradle worker memory for predictable debug builds.
+
 ## 0.1.0-beta.3 — 2026-10-22
 
 - Replaces the generated counter smoke test with a quickstart connection-flow test.
