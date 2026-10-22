@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-beta.10
+
+- Generates release checksums from versioned package files only.
+- No capture behavior changed from beta.9.
+
+
 ## 0.1.0-beta.9
 
 - Clarifies read-only private Git access with SSH and HTTPS credential helpers.

@@ -11,7 +11,7 @@ dependencies:
   proovit_capture:
     git:
       url: git@github.com:PROOV-IT/proovit-flutter-sdk.git
-      ref: v0.1.0-beta.9
+      ref: v0.1.0-beta.10
 ```
 
 Then run `flutter pub get`. The Android capture core is embedded in the tagged package snapshot. Host applications do not edit `settings.gradle`, declare `:capture-core`, or configure another Maven repository.
@@ -22,7 +22,7 @@ A repository owner adds the integrator's GitHub user or team with **Read** permi
 
 - **SSH:** register the integrator's public SSH key with their GitHub account, load its private key into `ssh-agent`, and keep the `git@github.com:PROOV-IT/proovit-flutter-sdk.git` URL above.
 - **HTTPS:** replace the dependency URL with `https://github.com/PROOV-IT/proovit-flutter-sdk.git`; authenticate with Git Credential Manager or `gh auth login --git-protocol https`. For CI, grant the job a credential with read-only Contents access to this repository.
-- Verify the account can read the immutable tag with `git ls-remote <same-repository-url> refs/tags/v0.1.0-beta.9`, then run `flutter pub get`. A 404 without GitHub authentication is expected for this private repository.
+- Verify the account can read the immutable tag with `git ls-remote <same-repository-url> refs/tags/v0.1.0-beta.10`, then run `flutter pub get`. A 404 without GitHub authentication is expected for this private repository.
 
 Do not put a token or password in the Git URL, `pubspec.yaml`, source code, build arguments or logs. Use the Git credential helper or the CI platform's secret store and grant only read access. Commit the generated `pubspec.lock` in applications to pin the resolved Git commit.
 
@@ -101,7 +101,7 @@ The client makes one session refresh after a GET returns 401. It does not blindl
 
 ## Version and source provenance
 
-Version `0.1.0-beta.9`, immutable Git tag `v0.1.0-beta.9`. The Android core snapshot is generated from canonical `packages/capture-core/android/src/main` by `scripts/export-flutter-sdk.sh`; use its `--check` mode to verify that the packaged core has not diverged. Package checksums are in `SHA256SUMS`. This package is not published on pub.dev or Maven. Read `CHANGELOG.md`, `COMPATIBILITY.md` and `LICENSE` before distributing it.
+Version `0.1.0-beta.10`, immutable Git tag `v0.1.0-beta.10`. The Android core snapshot is generated from canonical `packages/capture-core/android/src/main` by `scripts/export-flutter-sdk.sh`; use its `--check` mode to verify that the packaged core has not diverged. Package checksums are in `SHA256SUMS`. This package is not published on pub.dev or Maven. Read `CHANGELOG.md`, `COMPATIBILITY.md` and `LICENSE` before distributing it.
 
 ## Beta boundaries
 
