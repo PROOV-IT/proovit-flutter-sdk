@@ -13,7 +13,7 @@
 
 ## Release environment
 
-Release validation is performed with Flutter 3.38.7, Dart 3.10.7 and OpenJDK 21. The standalone Android project resolves the plugin's native dependencies from Google Maven Central and Flutter's normal repositories. See the #228 handoff for the exact dependency resolution and build results. The declared lower Flutter constraint is a pubspec compatibility range, not a claim that every historical Flutter/AGP combination was tested.
+Release validation is performed with Flutter 3.38.7, Dart 3.10.7 and OpenJDK 21. The standalone Android project resolves the plugin's native dependencies from Google Maven Central and Flutter's normal repositories. See the #228 handoff for exact dependency resolution and build results for the released tag. The declared lower Flutter constraint is a pubspec compatibility range, not a claim that every historical Flutter/AGP combination was tested.
 
 ## Platform support
 
