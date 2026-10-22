@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-beta.3 — 2026-10-22
+
+- Replaces the generated counter smoke test with a quickstart connection-flow test.
+
 ## 0.1.0-beta.2 — 2026-10-22
 
 - Corrects the private distribution repository root documentation and release metadata.
