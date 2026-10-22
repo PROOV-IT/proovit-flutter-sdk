@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-beta.9
+
+- Clarifies read-only private Git access with SSH and HTTPS credential helpers.
+- Makes the SDK capture quickstart self-contained apart from the explicitly supplied host `SessionProvider`.
+
+
 ## 0.1.0-beta.8
 
 - Correct release metadata and compatibility guidance; package contents and capture behavior are unchanged from beta.7.

@@ -11,10 +11,20 @@ dependencies:
   proovit_capture:
     git:
       url: git@github.com:PROOV-IT/proovit-flutter-sdk.git
-      ref: v0.1.0-beta.8
+      ref: v0.1.0-beta.9
 ```
 
-Then run `flutter pub get`. The Android capture core is embedded in the tagged package snapshot. Host applications do not edit `settings.gradle`, declare `:capture-core`, or configure another Maven repository. Use your normal GitHub SSH access for private dependencies. Never put a GitHub token or partner API secret in `pubspec.yaml`, source code, or build arguments.
+Then run `flutter pub get`. The Android capture core is embedded in the tagged package snapshot. Host applications do not edit `settings.gradle`, declare `:capture-core`, or configure another Maven repository.
+
+### Read-only GitHub access
+
+A repository owner adds the integrator's GitHub user or team with **Read** permission in the private repository's **Settings → Collaborators and teams**. The integrator must authenticate Git on every developer workstation and CI runner that fetches the package.
+
+- **SSH:** register the integrator's public SSH key with their GitHub account, load its private key into `ssh-agent`, and keep the `git@github.com:PROOV-IT/proovit-flutter-sdk.git` URL above.
+- **HTTPS:** replace the dependency URL with `https://github.com/PROOV-IT/proovit-flutter-sdk.git`; authenticate with Git Credential Manager or `gh auth login --git-protocol https`. For CI, grant the job a credential with read-only Contents access to this repository.
+- Verify the account can read the immutable tag with `git ls-remote <same-repository-url> refs/tags/v0.1.0-beta.9`, then run `flutter pub get`. A 404 without GitHub authentication is expected for this private repository.
+
+Do not put a token or password in the Git URL, `pubspec.yaml`, source code, build arguments or logs. Use the Git credential helper or the CI platform's secret store and grant only read access. Commit the generated `pubspec.lock` in applications to pin the resolved Git commit.
 
 ## Platform requirements
 
@@ -24,46 +34,42 @@ Then run `flutter pub get`. The Android capture core is embedded in the tagged p
 
 ## Quickstart
 
-The partner backend authenticates the host user and mints a short-lived PROOV-IT SDK session. The app passes a session provider to the SDK; never call the partner credential exchange from the device.
+The host application authenticates its own user and provides `issuePartnerSession`, a function that calls the partner's authenticated HTTPS backend and returns an `SdkSession`. The independent app in [`examples/flutter_partner_ready`](examples/flutter_partner_ready) includes a working HTTP implementation of that function and the Android host project. Replace its example backend URL with your own authenticated endpoint; the endpoint must map the signed-in host user to an authorized company and actor on the server.
+
+This function is a complete SDK-side capture sequence; pass the host application's `SessionProvider` implementation. The same compiling example is in [`examples/flutter_partner_ready/lib/quickstart.dart`](examples/flutter_partner_ready/lib/quickstart.dart):
 
 ```dart
-final client = ProovitCaptureClient(
-  baseUrl: Uri.parse('https://api.staging.proov-it.online/api/'),
-  sessionProvider: ({required forceRefresh}) => partnerApi.issueCaptureSession(
-    forceRefresh: forceRefresh,
-  ),
-);
+import 'package:proovit_capture/proovit_capture.dart';
 
-final capability = await client.getCapabilities();
-final nativeCapture = capability.values['capture.native_signed'];
-if (nativeCapture is! Map || nativeCapture['enabled'] != true ||
-    nativeCapture['available_now'] == false) {
-  throw StateError('Signed capture is not available for this company');
+Future<void> captureOne(SessionProvider issuePartnerSession) async {
+  final client = ProovitCaptureClient(
+    baseUrl: Uri.parse('https://api.staging.proov-it.online/api/'),
+    sessionProvider: issuePartnerSession,
+  );
+  try {
+    final capability = await client.getCapabilities();
+    final nativeCapture = capability.values['capture.native_signed'];
+    if (nativeCapture is! Map || nativeCapture['enabled'] != true ||
+        nativeCapture['available_now'] == false) {
+      throw StateError('Signed capture is unavailable for this company');
+    }
+
+    await client.enrollDeviceIfNeeded();
+    final draft = await client.capturePhoto();
+    final receipt = await client.submitCapture(draft);
+    if (receipt.captureId != draft.captureId ||
+        receipt.sha256.toLowerCase() != draft.sha256.toLowerCase() ||
+        receipt.sizeBytes != draft.sizeBytes ||
+        !['verified', 'verified_degraded'].contains(receipt.status)) {
+      throw StateError('The API receipt does not match the captured media');
+    }
+  } finally {
+    client.dispose();
+  }
 }
-await client.enrollDeviceIfNeeded();
-final draft = await client.capturePhoto();
-final receipt = await client.submitCapture(draft,
-  onProgress: (sent, total) => reportProgress(total == 0 ? 0 : sent / total));
-assert(receipt.captureId == draft.captureId);
-assert(receipt.sha256.toLowerCase() == draft.sha256.toLowerCase());
-assert(receipt.sizeBytes == draft.sizeBytes);
-assert(receipt.status == 'verified' || receipt.status == 'verified_degraded');
-client.dispose();
 ```
 
-`partnerApi.issueCaptureSession` calls an authenticated endpoint on your backend and constructs:
-
-```dart
-SdkSession(
-  accessToken: json['access_token'] as String,
-  expiresAt: DateTime.parse(json['expires_at'] as String),
-  companyId: json['company_id'] as String,
-  actorId: json['actor_id'] as String,
-  identityScope: json['identity_scope'] as String,
-)
-```
-
-Use a stable opaque `identityScope` for each authorized user/tenant/delegated-subject boundary. Clear cached sessions, clients, capabilities and receipt UI on logout or account/company change. The SDK partitions local keys and pending captures by this scope.
+`SessionProvider` is the SDK's `Future<SdkSession> Function({required bool forceRefresh})` type. Implement it by making an authenticated request to your backend and mapping its response into `SdkSession`; never call the PROOV-IT credential exchange from the device. The partner backend section and sample provide that boundary. This API flow requires an online session, camera permission, and an available Android Activity.
 
 ## Partner backend
 
@@ -95,7 +101,7 @@ The client makes one session refresh after a GET returns 401. It does not blindl
 
 ## Version and source provenance
 
-Version `0.1.0-beta.8`, immutable Git tag `v0.1.0-beta.8`. The Android core snapshot is generated from canonical `packages/capture-core/android/src/main` by `scripts/export-flutter-sdk.sh`; use its `--check` mode to verify that the packaged core has not diverged. Package checksums are in `SHA256SUMS`. This package is not published on pub.dev or Maven. Read `CHANGELOG.md`, `COMPATIBILITY.md` and `LICENSE` before distributing it.
+Version `0.1.0-beta.9`, immutable Git tag `v0.1.0-beta.9`. The Android core snapshot is generated from canonical `packages/capture-core/android/src/main` by `scripts/export-flutter-sdk.sh`; use its `--check` mode to verify that the packaged core has not diverged. Package checksums are in `SHA256SUMS`. This package is not published on pub.dev or Maven. Read `CHANGELOG.md`, `COMPATIBILITY.md` and `LICENSE` before distributing it.
 
 ## Beta boundaries
 
