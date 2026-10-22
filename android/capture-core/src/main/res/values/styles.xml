@@ -1,0 +1,5 @@
+<resources>
+    <!-- CaptureActivity extends AppCompatActivity and must use an AppCompat theme,
+         regardless of the host application's theme. -->
+    <style name="ProovitCaptureTheme" parent="Theme.AppCompat.Light.NoActionBar" />
+</resources>

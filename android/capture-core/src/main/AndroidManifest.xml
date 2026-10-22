@@ -1,0 +1,7 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <application>
+        <activity android:name="io.proovit.capture.core.android.CaptureActivity" android:exported="false" android:screenOrientation="portrait" android:theme="@style/ProovitCaptureTheme" />
+    </application>
+</manifest>
