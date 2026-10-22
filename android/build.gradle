@@ -1,14 +1,10 @@
 group = 'io.proovit.capture.flutter'
-version = '0.1.0'
+version = '0.1.0-beta.5'
 
-buildscript {
-    ext.kotlin_version = '2.0.21'
-    repositories { google(); mavenCentral() }
-    dependencies { classpath 'com.android.tools.build:gradle:8.6.1'; classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version" }
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
 }
-
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
 
 android {
     namespace 'io.proovit.capture.flutter'

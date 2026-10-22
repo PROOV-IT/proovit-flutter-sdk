@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-beta.5 — 2026-10-22
+
+- Uses the host application’s Android Gradle Plugin and Kotlin plugin versions without loading duplicate plugin classpaths.
+
 ## 0.1.0-beta.4 — 2026-10-22
 
 - Caps the independent sample Gradle worker memory for predictable debug builds.
