@@ -10,7 +10,7 @@ dependencies:
   proovit_capture:
     git:
       url: git@github.com:PROOV-IT/proovit-flutter-sdk.git
-      ref: v0.1.0-beta.5
+      ref: v0.1.0-beta.6
 dev_dependencies:
   flutter_test:
     sdk: flutter

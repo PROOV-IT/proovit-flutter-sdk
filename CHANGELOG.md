@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0-beta.6 — 2026-10-22
+
+- Moves plugin metadata below the Gradle `plugins` block for standard Flutter/Gradle script compatibility.
+
 ## 0.1.0-beta.5 — 2026-10-22
 
 - Uses the host application’s Android Gradle Plugin and Kotlin plugin versions without loading duplicate plugin classpaths.

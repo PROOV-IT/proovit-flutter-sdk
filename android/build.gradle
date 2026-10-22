@@ -1,10 +1,10 @@
-group = 'io.proovit.capture.flutter'
-version = '0.1.0-beta.5'
-
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
 }
+
+group = 'io.proovit.capture.flutter'
+version = '0.1.0-beta.6'
 
 android {
     namespace 'io.proovit.capture.flutter'
